@@ -38,14 +38,14 @@ LOF Monitor 是一个基于 Electron 开发的桌面应用，用于实时监控 
 #### 方式1：使用启动脚本（推荐）
 
 ```bash
-cd electron_pure
+cd lof-monitor
 双击 → 一键启动.bat   # Windows
 ```
 
 #### 方式2：命令行
 
 ```bash
-cd electron_pure
+cd lof-monitor
 npm install
 npm start
 ```
@@ -127,7 +127,7 @@ npm start
 ### 打包命令
 
 ```bash
-cd electron_pure
+cd lof-monitor
 双击 → 一键打包.bat   # Windows
 # 或
 npm run build:win     # Windows
@@ -167,7 +167,7 @@ HTTP客户端: axios
 ### 目录结构
 
 ```
-electron_pure/
+lof-monitor/
 ├── main.js              # Electron 主进程
 ├── preload.js           # 预加载脚本
 ├── renderer.js          # 渲染进程
