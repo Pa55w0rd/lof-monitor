@@ -1,0 +1,70 @@
+{
+  "name": "lof-monitor",
+  "version": "1.0.0",
+  "description": "LOF基金套利机会实时监控工具",
+  "main": "main.js",
+  "scripts": {
+    "start": "chcp 65001 >nul 2>&1 & electron .",
+    "dev": "chcp 65001 >nul 2>&1 & electron . --dev",
+    "build": "electron-builder",
+    "build:win": "electron-builder --win",
+    "build:mac": "electron-builder --mac",
+    "build:linux": "electron-builder --linux"
+  },
+  "build": {
+    "appId": "com.lof.monitor",
+    "productName": "LOF Monitor",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "renderer.js",
+      "api.js",
+      "data-processor.js",
+      "cache-manager.js",
+      "index.html",
+      "styles.css",
+      "icon.png"
+    ],
+    "win": {
+      "target": "nsis",
+      "icon": "icon.ico",
+      "sign": null,
+      "signingHashAlgorithms": []
+    },
+    "mac": {
+      "target": "dmg",
+      "icon": "icon.icns"
+    },
+    "linux": {
+      "target": "AppImage",
+      "icon": "icon.png"
+    }
+  },
+  "dependencies": {
+    "axios": "^1.6.0",
+    "call-bind": "^1.0.8",
+    "electron-squirrel-startup": "^1.0.0",
+    "get-intrinsic": "^1.3.0",
+    "has-symbols": "^1.1.0"
+  },
+  "devDependencies": {
+    "electron": "^28.0.0",
+    "electron-builder": "^24.9.1"
+  },
+  "keywords": [
+    "LOF",
+    "基金",
+    "套利",
+    "监控"
+  ],
+  "author": "Pa55w0rd",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Pa55w0rd/lof-monitor"
+  },
+  "homepage": "https://github.com/Pa55w0rd",
+  "license": "MIT"
+}

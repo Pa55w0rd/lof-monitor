@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LOF基金套利机会实时监控工具</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <!-- 窗口调整大小边框 -->
+  <div class="resize-border resize-top"></div>
+  <div class="resize-border resize-right"></div>
+  <div class="resize-border resize-bottom"></div>
+  <div class="resize-border resize-left"></div>
+  <div class="resize-corner resize-top-left"></div>
+  <div class="resize-corner resize-top-right"></div>
+  <div class="resize-corner resize-bottom-left"></div>
+  <div class="resize-corner resize-bottom-right"></div>
+
+  <!-- 自定义标题栏 -->
+  <div class="titlebar">
+    <div class="titlebar-drag">
+      <span class="titlebar-title">LOF Monitor v1.0.0 by Pa55w0rd</span>
+    </div>
+    <div class="titlebar-controls">
+      <button class="titlebar-btn minimize-btn" id="minimize-btn" title="最小化">
+        <span class="btn-icon"></span>
+      </button>
+      <button class="titlebar-btn maximize-btn" id="maximize-btn" title="最大化">
+        <span class="btn-icon"></span>
+      </button>
+      <button class="titlebar-btn close-btn" id="close-btn" title="关闭">
+        <span class="btn-icon">×</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- 主容器 -->
+  <div class="main-container">
+    <!-- 侧边栏 -->
+    <aside class="sidebar">
+    <div class="sidebar-header">
+      <h1>LOF Monitor</h1>
+      <p class="version">v1.0.0 by Pa55w0rd</p>
+    </div>
+    
+    <div class="sidebar-content">
+      <!-- 溢价率筛选 -->
+      <div class="control-group">
+        <label for="premium-slider">
+          <span class="label-text">最低溢价率</span>
+          <span class="label-value" id="premium-value">5.00%</span>
+        </label>
+        <input 
+          type="range" 
+          id="premium-slider" 
+          min="-5" 
+          max="10" 
+          step="0.1" 
+          value="5"
+          class="slider"
+        >
+        <div class="slider-marks">
+          <span>-5%</span>
+          <span>0%</span>
+          <span>5%</span>
+          <span>10%</span>
+        </div>
+      </div>
+      
+      <!-- 成交额筛选 -->
+      <div class="control-group">
+        <label for="volume-slider">
+          <span class="label-text">最低成交额</span>
+          <span class="label-value" id="volume-value">2000 万</span>
+        </label>
+        <input 
+          type="range" 
+          id="volume-slider" 
+          min="0" 
+          max="10000" 
+          step="100" 
+          value="2000"
+          class="slider"
+        >
+        <div class="slider-marks">
+          <span>0</span>
+          <span>2500万</span>
+          <span>5000万</span>
+          <span>1亿</span>
+        </div>
+      </div>
+      
+      <!-- 窗口透明度 -->
+      <div class="control-group">
+        <label for="opacity-slider">
+          <span class="label-text">窗口透明度</span>
+          <span class="label-value" id="opacity-value">100%</span>
+        </label>
+        <input 
+          type="range" 
+          id="opacity-slider" 
+          min="30" 
+          max="100" 
+          step="5" 
+          value="100"
+          class="slider"
+        >
+        <div class="slider-marks">
+          <span>30%</span>
+          <span>65%</span>
+          <span>100%</span>
+        </div>
+      </div>
+      
+      <!-- 筛选选项 -->
+      <div class="control-group">
+        <div class="checkbox-group">
+          <label class="checkbox-label">
+            <input type="checkbox" id="filter-suspended" checked>
+            <span class="checkbox-text">过滤暂停/停止申购、停牌状态</span>
+          </label>
+          <!-- <div class="checkbox-hint">暂停/停止申购、停牌</div> -->
+        </div>
+      </div>
+      
+      <!-- 自动刷新间隔 -->
+      <div class="control-group">
+        <label for="refresh-interval-slider">
+          <span class="label-text">自动刷新</span>
+          <span class="label-value" id="refresh-interval-value">不刷新</span>
+        </label>
+        <input 
+          type="range" 
+          id="refresh-interval-slider" 
+          min="0" 
+          max="30" 
+          step="1" 
+          value="0"
+          class="slider"
+        >
+        <div class="slider-marks">
+          <span>不刷新</span>
+          <span>15分钟</span>
+          <span>30分钟</span>
+        </div>
+      </div>
+      
+      <!-- 操作按钮 -->
+      <div class="button-group">
+        <button id="refresh-btn" class="btn btn-primary">
+          <span id="refresh-btn-text">刷新数据</span>
+        </button>
+        <button id="force-refresh-btn" class="btn btn-secondary">
+          强制刷新
+        </button>
+      </div>
+      
+      <!-- 缓存信息 -->
+      <div class="cache-info" id="cache-info">
+        <p class="info-text">正在加载...</p>
+      </div>
+    </div>
+  </aside>
+  
+  <!-- 主内容区 -->
+  <main class="main-content">
+    <!-- 顶部标题栏 -->
+    <header class="header">
+      <h2>LOF 基金套利机会监控</h2>
+    </header>
+    
+    <!-- 加载指示器 -->
+    <div id="loading" class="loading" style="display: none;">
+      <div class="loading-spinner"></div>
+      <p>正在加载数据...</p>
+    </div>
+    
+    <!-- 统计卡片 -->
+    <div id="stats-cards" class="stats-grid stats-grid-3">
+      <div class="stat-card">
+        <div class="stat-label">总数量</div>
+        <div class="stat-value" id="stat-total">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">符合条件</div>
+        <div class="stat-value highlight" id="stat-filtered">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">最高溢价率</div>
+        <div class="stat-value success" id="stat-max">0.00%</div>
+      </div>
+    </div>
+    
+    <!-- 标签页 -->
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="filtered">
+        套利机会 (<span id="filtered-count">0</span>)
+      </button>
+      <button class="tab-btn" data-tab="all">
+        全部数据 (<span id="all-count">0</span>)
+      </button>
+    </div>
+    
+    <!-- 标签页内容 -->
+    <div class="tab-content">
+      <!-- Tab 1: 筛选结果 -->
+      <div id="tab-filtered" class="tab-pane active">
+        <div class="table-header">
+          <h3>符合条件的套利机会</h3>
+          <div class="header-actions">
+            <input 
+              type="text" 
+              id="search-filtered" 
+              class="search-input" 
+              placeholder="搜索基金代码或名称..."
+            >
+            <button id="export-filtered-btn" class="btn btn-small">
+              导出 CSV
+            </button>
+          </div>
+        </div>
+        <div class="table-container">
+          <table id="filtered-table" class="data-table">
+            <thead>
+              <tr>
+                <th>基金代码</th>
+                <th>基金名称</th>
+                <th>涨跌幅</th>
+                <th>溢价率</th>
+                <th>现价</th>
+                <th>基金净值</th>
+                <th>实时估值</th>
+                <th>成交额</th>
+                <th>申购费</th>
+                <th>申购状态</th>
+              </tr>
+            </thead>
+            <tbody id="filtered-tbody">
+              <tr>
+                <td colspan="10" class="no-data">暂无数据</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      
+      <!-- Tab 2: 全部数据 -->
+      <div id="tab-all" class="tab-pane">
+        <div class="table-header">
+          <h3>全部 LOF 数据</h3>
+          <div class="header-actions">
+            <input 
+              type="text" 
+              id="search-all" 
+              class="search-input" 
+              placeholder="搜索基金代码或名称..."
+            >
+            <button id="export-all-btn" class="btn btn-small">
+              导出 CSV
+            </button>
+          </div>
+        </div>
+        <div class="table-container">
+          <table id="all-table" class="data-table">
+            <thead>
+              <tr>
+                <th>基金代码</th>
+                <th>基金名称</th>
+                <th>涨跌幅</th>
+                <th>溢价率</th>
+                <th>现价</th>
+                <th>基金净值</th>
+                <th>实时估值</th>
+                <th>成交额</th>
+                <th>申购费</th>
+                <th>申购状态</th>
+              </tr>
+            </thead>
+            <tbody id="all-tbody">
+              <tr>
+                <td colspan="10" class="no-data">暂无数据</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </main>
+  </div><!-- 结束 main-container -->
+  
+  <!-- Toast 通知 -->
+  <div id="toast" class="toast"></div>
+  
+  <script src="renderer.js"></script>
+</body>
+</html>
